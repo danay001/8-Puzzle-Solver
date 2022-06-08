@@ -1,6 +1,6 @@
 
 CC=g++
-CC_FLAGS=-std=c++11 
+CC_FLAGS=-std=c++17 -Wall -Werror
 EXEC=8solver.out
 SOURCES=$(wildcard *.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
