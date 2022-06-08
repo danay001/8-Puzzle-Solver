@@ -15,6 +15,7 @@ Node::Node(){
 
     misplaced_num = find_misplaced();
     Manhattan_dist = find_man_dist();
+    set_key();
 }
 
 Node::Node(char a, char b, char c, char d, char e, char f, char g, char h, char i){
@@ -30,6 +31,7 @@ Node::Node(char a, char b, char c, char d, char e, char f, char g, char h, char 
 
     misplaced_num = find_misplaced();
     Manhattan_dist = find_man_dist();
+    set_key();
 }
 
 Node::Node(char tile[9]){
@@ -45,6 +47,7 @@ Node::Node(char tile[9]){
 
     misplaced_num = find_misplaced();
     Manhattan_dist = find_man_dist();
+    set_key();
 }
 
 Node::~Node(){
@@ -61,6 +64,16 @@ bool Node::operator==(const Node &rhs) const{
     }
 
     return true;
+}
+
+void Node::set_key(){
+    std::string s = "";
+    for(int i = 0; i < 3; ++i){
+        for(int j = 0; j < 3; ++j){
+            s += tiles[i][j];
+        }
+    }
+    this->key = s;
 }
 
 int Node::find_misplaced(){
@@ -129,7 +142,7 @@ void Node::print(){
         for(int j = 0; j < 3; ++j){
             std::cout << tiles[i][j] << ' '; 
         }
-        std::cout << std::endl;
+        std::cout << '\n';
     }
     return;
 }
@@ -176,6 +189,10 @@ int Node::getManDist(){
 
 int Node::getMisplacedNum(){
     return misplaced_num;
+}
+
+std::string Node::get_key(){
+    return key;
 }
 
 

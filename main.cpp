@@ -1,7 +1,21 @@
 #include <iostream>
 #include <queue>
 #include <vector>
+#include <unordered_set>
+#include <functional>
 #include "node.h"
+
+struct NodeHash{
+    size_t operator()(Node* const& n) const{
+        return std::hash<std::string>()(n->get_key());
+    }
+};
+
+struct NodeCompare{
+    bool operator()(Node* const& n1, Node* const& n2) const{
+        return *n1 == *n2;
+    }
+};
 
 struct LeastCost{
     bool operator()(Node* lhs, Node* rhs) const{
@@ -26,15 +40,14 @@ struct LeastManDistance{
 
 Node* Uniform_Cost_Search(Node* puzzle){
     std::priority_queue<Node*, std::vector<Node*>, LeastCost> nodes;
-    std::vector<Node*> past_nodes;
+    std::unordered_set<Node*, NodeHash, NodeCompare> seen_nodes;
     nodes.push(puzzle);
     Node* cur_node = puzzle;
 
     int g_n = 0;
     int h_n = 0;
     int totalNodes = 0;
-    int maxQNodes = 0;
-    bool seen = false;
+    unsigned int maxQNodes = 0;
 
     if(nodes.empty()){
         return nullptr;
@@ -43,7 +56,8 @@ Node* Uniform_Cost_Search(Node* puzzle){
     std::cout << "Expanding current node: " << std::endl;
     cur_node->print();
 
-    past_nodes.push_back(cur_node);
+    //past_nodes.push_back(cur_node);
+    seen_nodes.insert(cur_node);
 
     while(!nodes.empty()){
         cur_node = nodes.top();
@@ -64,9 +78,9 @@ Node* Uniform_Cost_Search(Node* puzzle){
             return cur_node;
         }
 
-        std::cout << "The best state to expand with a g(n) = " << g_n << " and h(n) = " << h_n << " is: " << std::endl;
+        std::cout << "The best state to expand with a g(n) = " << g_n << " and h(n) = " << h_n << " is: \n";
         cur_node->print();
-        std::cout << "Expanding this node" << std::endl << std::endl;
+        std::cout << "Expanding this node \n \n";
 
         Node* child1 = cur_node->move_left();
         Node* child2 = cur_node->move_right();
@@ -74,63 +88,31 @@ Node* Uniform_Cost_Search(Node* puzzle){
         Node* child4 = cur_node->move_down();
 
         if(child1 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child1 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child1) == seen_nodes.end()){ //Only add unseen states to queue
                 child1->setCost(g_n + 1);
                 nodes.push(child1);
-                past_nodes.push_back(child1);
+                seen_nodes.insert(child1);
             }
         }
         if(child2 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child2 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child2) == seen_nodes.end()){ //Only add unseen states to queue
                 child2->setCost(g_n + 1);
                 nodes.push(child2);
-                past_nodes.push_back(child2);
+                seen_nodes.insert(child2);
             }
         }
         if(child3 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child3 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child3) == seen_nodes.end()){ //Only add unseen states to queue
                 child3->setCost(g_n + 1);
                 nodes.push(child3);
-                past_nodes.push_back(child3);
+                seen_nodes.insert(child3);
             }
         }
         if(child4 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child4 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child4) == seen_nodes.end()){ //Only add unseen states to queue
                 child4->setCost(g_n + 1);
                 nodes.push(child4);
-                past_nodes.push_back(child4);
+                seen_nodes.insert(child4);
             }
         }
     }
@@ -139,20 +121,20 @@ Node* Uniform_Cost_Search(Node* puzzle){
 
 Node* A_Star_ManDist(Node* puzzle){
     std::priority_queue<Node*, std::vector<Node*>, LeastManDistance> nodes;
-    std::vector<Node*> past_nodes;
+    //std::vector<Node*> past_nodes;
+    std::unordered_set<Node*, NodeHash, NodeCompare> seen_nodes;
     nodes.push(puzzle);
     Node* cur_node = puzzle;
     int g_n = 0;
     int h_n = 0;
     int totalNodes = 0;
-    int maxQNodes = 0;
-    bool seen = false;
+    unsigned int maxQNodes = 0;
 
     if(nodes.empty()){
         return nullptr;  
     }
 
-    past_nodes.push_back(cur_node);
+    seen_nodes.insert(cur_node);
 
     std::cout << "Expanding state: " << std::endl;
     cur_node->print();
@@ -187,63 +169,31 @@ Node* A_Star_ManDist(Node* puzzle){
         Node* child4 = cur_node->move_down();
 
         if(child1 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child1 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child1) == seen_nodes.end()){ //Only add unseen states to queue
                 child1->setCost(g_n + 1);
                 nodes.push(child1);
-                past_nodes.push_back(child1);
+                seen_nodes.insert(child1);
             }
         }
         if(child2 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child2 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child2) == seen_nodes.end()){ //Only add unseen states to queue
                 child2->setCost(g_n + 1);
                 nodes.push(child2);
-                past_nodes.push_back(child2);
+                seen_nodes.insert(child2);
             }
         }
         if(child3 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child3 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child3) == seen_nodes.end()){ //Only add unseen states to queue
                 child3->setCost(g_n + 1);
                 nodes.push(child3);
-                past_nodes.push_back(child3);
+                seen_nodes.insert(child3);
             }
         }
         if(child4 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child4 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child4) == seen_nodes.end()){ //Only add unseen states to queue
                 child4->setCost(g_n + 1);
                 nodes.push(child4);
-                past_nodes.push_back(child4);
+                seen_nodes.insert(child4);
             }
         }
     }
@@ -252,21 +202,19 @@ Node* A_Star_ManDist(Node* puzzle){
 
 Node* A_Star_Misplaced(Node* puzzle){
     std::priority_queue<Node*, std::vector<Node*>, LeastMismatch> nodes;
-    std::vector<Node*> past_nodes;
-    
+    //std::vector<Node*> past_nodes;
+    std::unordered_set<Node*, NodeHash, NodeCompare> seen_nodes;
     nodes.push(puzzle);
     Node* cur_node = puzzle;
     int g_n = 0;
     int h_n = 0;
     int totalNodes = 0;
-    int maxQNodes = 0;
-    bool seen = false;
+    unsigned int maxQNodes = 0;
 
     if(nodes.empty()){
         return nullptr;  
     }
-
-    past_nodes.push_back(cur_node);
+    seen_nodes.insert(cur_node);
 
     std::cout << "Expanding state: " << std::endl;
     cur_node->print();
@@ -301,63 +249,31 @@ Node* A_Star_Misplaced(Node* puzzle){
         Node* child4 = cur_node->move_down();
 
         if(child1 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child1 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child1) == seen_nodes.end()){ //Only add unseen states to queue
                 child1->setCost(g_n + 1);
                 nodes.push(child1);
-                past_nodes.push_back(child1);
+                seen_nodes.insert(child1);
             }
         }
         if(child2 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child2 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child2) == seen_nodes.end()){ //Only add unseen states to queue
                 child2->setCost(g_n + 1);
                 nodes.push(child2);
-                past_nodes.push_back(child2);
+                seen_nodes.insert(child2);
             }
         }
         if(child3 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child3 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child3) == seen_nodes.end()){ //Only add unseen states to queue
                 child3->setCost(g_n + 1);
                 nodes.push(child3);
-                past_nodes.push_back(child3);
+                seen_nodes.insert(child3);
             }
         }
         if(child4 != nullptr){
-            seen = false;
-            for(unsigned i = 0; i < past_nodes.size(); ++i){
-                if(past_nodes.at(i) != nullptr){
-                    if(*child4 == *past_nodes.at(i)){
-                        seen = true;
-                    }
-                }
-            }
-            if(!seen){
+            if(seen_nodes.find(child4) == seen_nodes.end()){ //Only add unseen states to queue
                 child4->setCost(g_n + 1);
                 nodes.push(child4);
-                past_nodes.push_back(child4);
+                seen_nodes.insert(child4);
             }
         }
     }
@@ -385,7 +301,7 @@ void menu(){
         std::cout << "Enter your puzzle, use a zero to represent the blank." << std::endl;
         std::cout << "Enter the first row. Use spaces between numbers." << std::endl;
         std::cin >> a >> b >> c;
-        init_state->set_tile(0, 0, (a + '0'));
+        init_state->set_tile(0, 0, (a + '0')); // +'0' to convert int value to char
         init_state->set_tile(0, 1, (b + '0'));
         init_state->set_tile(0, 2, (c + '0'));
 
@@ -400,11 +316,6 @@ void menu(){
         init_state->set_tile(2, 0, (a + '0'));
         init_state->set_tile(2, 1, (b + '0'));
         init_state->set_tile(2, 2, (c + '0'));
-    }
-
-    Node* state2 = new Node('1', '2', '3', '4', '8', '-', '7', '6', '5');
-    if(init_state == state2){
-        std::cout << "== operator works" << std::endl;
     }
 
     std::cout << "Enter your choice of algorithm." << std::endl;
@@ -422,15 +333,22 @@ void menu(){
 
     if(choice == 1){
         Node* soln = Uniform_Cost_Search(init_state);
+        if(soln == nullptr){
+            std::cout << "Unsolvable Puzzle\n";
+        }
     }
     else if(choice == 2){
         Node* soln = A_Star_Misplaced(init_state);
+        if(soln == nullptr){
+            std::cout << "Unsolvable Puzzle\n";
+        }
     }
     else if(choice == 3){
         Node* soln = A_Star_ManDist(init_state);
+        if(soln == nullptr){
+            std::cout << "Unsolvable Puzzle\n";
+        }
     }
-
-    delete init_state;
 
 }
 
